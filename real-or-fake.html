@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real or Fake Tech?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0221;--ink:#fff;--dim:#c3b2ee;--acc:#ff2bd6;--cy:#00f0ff;--yel:#ffe66d;--good:#19ffb0;--bad:#ff3d7f;--panel:#16043a;--line:rgba(255,43,214,.5);--disp:"Orbitron",system-ui,sans-serif;--body:"Rubik",system-ui,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center;background:linear-gradient(180deg,#0d0221 0%,#2b0a5c 55%,#6a1285 100%) fixed;color:var(--ink);font-family:var(--body);overflow-x:hidden}
+/* retro sun (::after) + scrolling perspective grid floor (::before) */
+body::after{content:"";position:fixed;left:50%;bottom:11vh;width:min(34vw,290px);aspect-ratio:1;border-radius:50%;z-index:1;pointer-events:none;transform:translateX(-50%);background:linear-gradient(180deg,var(--yel) 10%,var(--acc) 85%);box-shadow:0 0 70px rgba(255,43,214,.4);-webkit-mask:linear-gradient(180deg,#000 0 52%,transparent 52% 56%,#000 56% 65%,transparent 65% 70%,#000 70% 78%,transparent 78% 84%,#000 84% 91%,transparent 91% 97%,#000 97%);mask:linear-gradient(180deg,#000 0 52%,transparent 52% 56%,#000 56% 65%,transparent 65% 70%,#000 70% 78%,transparent 78% 84%,#000 84% 91%,transparent 91% 97%,#000 97%);opacity:.5}
+body::before{content:"";position:fixed;left:-60%;right:-60%;bottom:0;height:44vh;z-index:2;pointer-events:none;transform:perspective(340px) rotateX(58deg);transform-origin:center bottom;background-color:#12033a;background-image:linear-gradient(#12033a,transparent 40%),linear-gradient(90deg,rgba(255,43,214,.7) 2px,transparent 2px),linear-gradient(rgba(0,240,255,.55) 2px,transparent 2px);background-size:100% 100%,70px 100%,100% 44px;animation:grid 1.4s linear infinite}
+@keyframes grid{from{background-position:0 0,0 0,0 0}to{background-position:0 0,0 0,0 44px}}
+#fx-bg{position:fixed;inset:0;z-index:0}
+#fx-spark{position:fixed;inset:0;z-index:5;pointer-events:none}
+#app{position:relative;z-index:3;width:min(980px,100%)}
+
+h1{margin:0 0 .45em;font-family:var(--disp);font-weight:900;font-style:italic;text-transform:uppercase;font-size:clamp(2rem,6.4vw,4.3rem);line-height:1.08;background:linear-gradient(180deg,#fff 0 46%,var(--yel) 46% 53%,var(--acc) 53% 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(255,43,214,.75))}
+h1:hover{animation:glitch .22s steps(2) infinite}
+@keyframes glitch{25%{transform:translate(2px,-1px) skewX(2deg)}50%{transform:translate(-2px,1px)}75%{transform:translate(1px,1px) skewX(-2deg)}}
+h2{font-family:var(--disp);font-weight:800;font-style:italic;text-transform:uppercase;font-size:clamp(1.5rem,3.5vw,2.4rem);margin:.4em 0;text-shadow:0 0 14px var(--cy),0 0 34px rgba(0,240,255,.4)}
+p{color:var(--dim);font-size:1.15rem}
+
+button{font:inherit;color:inherit;cursor:pointer}
+#btn-start,#btn-next,#btn-restart{margin-top:22px;padding:14px 40px;border:2px solid var(--cy);border-radius:4px;background:rgba(0,240,255,.06);color:var(--cy);font:900 1rem var(--disp);text-transform:uppercase;letter-spacing:.16em;box-shadow:0 0 16px rgba(0,240,255,.45),inset 0 0 16px rgba(0,240,255,.2);text-shadow:0 0 8px var(--cy);transition:transform .15s,background .15s,color .15s,box-shadow .15s}
+#btn-start:hover,#btn-next:hover,#btn-restart:hover{transform:scale(1.07);background:var(--cy);color:var(--bg);text-shadow:none;box-shadow:0 0 40px rgba(0,240,255,.8)}
+
+#hud{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:24px;font:700 .78rem var(--disp);text-transform:uppercase;letter-spacing:.1em;color:var(--dim)}
+#hud>span{padding:8px 18px;border:1px solid var(--line);border-radius:4px;background:rgba(255,255,255,.05);box-shadow:0 0 12px rgba(255,43,214,.2)}
+#hud span span{color:var(--yel);font-weight:900;text-shadow:0 0 10px rgba(255,230,109,.6)}
+
+:is(.card,.option,#statement-card,#tester){position:relative;overflow:hidden;transition:transform .15s,border-color .3s,box-shadow .3s,opacity .3s}
+:is(.card,.option,#statement-card,#tester)::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(0,240,255,.22),transparent 70%)}
+:is(.card,.option,#statement-card,#tester):hover::before{opacity:1}
+#statement-card{padding:56px 32px;margin-bottom:26px;border:2px solid transparent;border-radius:6px;background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(90deg,var(--acc),var(--cy)) border-box;box-shadow:0 0 30px rgba(255,43,214,.35),0 0 70px rgba(0,240,255,.15)}
+#statement{margin:0;color:var(--ink);font-family:var(--body);font-weight:600;font-size:clamp(1.3rem,3.2vw,2.1rem);line-height:1.35;text-shadow:0 0 18px rgba(255,255,255,.25)}
+
+#answers{display:flex;gap:22px;justify-content:center}
+.answer{flex:1;max-width:280px;padding:20px;border:2px solid;border-radius:4px;background:rgba(0,0,0,.25);font:900 1.4rem var(--disp);text-transform:uppercase;letter-spacing:.14em;transform:skewX(-8deg);transition:transform .15s,background .2s,color .2s,box-shadow .2s}
+.answer:hover{transform:skewX(-8deg) scale(1.06)}
+#btn-real{border-color:var(--cy);color:var(--cy);text-shadow:0 0 10px var(--cy);box-shadow:0 0 16px rgba(0,240,255,.4),inset 0 0 16px rgba(0,240,255,.15)}
+#btn-real:hover{background:var(--cy);color:var(--bg);text-shadow:none;box-shadow:0 0 40px rgba(0,240,255,.85)}
+#btn-fake{border-color:var(--acc);color:var(--acc);text-shadow:0 0 10px var(--acc);box-shadow:0 0 16px rgba(255,43,214,.45),inset 0 0 16px rgba(255,43,214,.15)}
+#btn-fake:hover{background:var(--acc);color:var(--bg);text-shadow:none;box-shadow:0 0 40px rgba(255,43,214,.85)}
+
+#reveal{max-width:640px;margin:24px auto 0;padding:14px 18px;color:var(--ink);background:rgba(13,2,33,.75);border:1px solid var(--line);border-radius:4px;font-size:1.05rem}
+
+[data-state=correct]{border-color:var(--good)!important;animation:electric .9s ease-in-out infinite alternate}
+[data-state=wrong]{border-color:var(--bad)!important;box-shadow:0 0 40px rgba(255,61,127,.55)!important}
+@keyframes electric{from{box-shadow:0 0 0 1px var(--good),0 0 22px rgba(25,255,176,.35)}to{box-shadow:0 0 0 2px var(--good),0 0 56px rgba(25,255,176,.7)}}
+
+@media(max-width:640px){#answers{gap:12px}.answer{font-size:1.1rem;padding:16px 8px}body::after{bottom:13vh;width:50vw}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <section id="screen-start">
+    <h1>Real or Fake Tech?</h1>
+    <p>A tech statement appears. Is it real or fake? Build a streak.</p>
+    <button id="btn-start">Start</button>
+  </section>
+
+  <section id="screen-game" hidden>
+    <header id="hud">
+      <span>Statement <span id="s-num">1</span> of <span id="s-total">6</span></span>
+      <span>Score: <span id="score">0</span></span>
+      <span>Streak: <span id="streak">0</span></span>
+    </header>
+
+    <article id="statement-card" data-state="idle">
+      <p id="statement"></p>
+    </article>
+
+    <div id="answers">
+      <button id="btn-real" class="answer" data-answer="real">Real</button>
+      <button id="btn-fake" class="answer" data-answer="fake">Fake</button>
+    </div>
+
+    <p id="reveal" hidden></p>
+    <button id="btn-next" hidden>Next</button>
+  </section>
+
+  <section id="screen-end" hidden>
+    <h2>Done!</h2>
+    <p id="final-score"></p>
+    <p id="best-streak"></p>
+    <button id="btn-restart">Play again</button>
+    <!-- Add your QR code image here -->
+  </section>
+
+</main>
+
+<script>
+const statements = [
+  { text:"The first computer \"bug\" was a real moth.", answer:"real",
+    why:"A moth was found stuck in a Harvard Mark II relay in 1947 and taped into the logbook." },
+  { text:"Wi-Fi stands for \"Wireless Fidelity\".", answer:"fake",
+    why:"It doesn't stand for anything. The name was invented by a branding agency." },
+  { text:"The first webcam pointed at a coffee pot.", answer:"real",
+    why:"Researchers at Cambridge rigged a camera so they could check if the pot was full without walking over." },
+  { text:"The Python programming language is named after the snake.", answer:"fake",
+    why:"It's named after the comedy group Monty Python." },
+  { text:"Google's original name was BackRub.", answer:"real",
+    why:"It was named for its analysis of 'back links' before becoming Google." },
+  { text:"Nintendo started out making playing cards.", answer:"real",
+    why:"Founded in 1889, it made handmade playing cards long before video games." }
+];
+
+const $ = id => document.getElementById(id);
+let index = 0, score = 0, streak = 0, best = 0, locked = false;
+
+function show(screen){
+  ["screen-start","screen-game","screen-end"].forEach(s => $(s).hidden = (s !== screen));
+}
+
+function loadStatement(){
+  locked = false;
+  $("s-num").textContent = index + 1;
+  $("s-total").textContent = statements.length;
+  $("score").textContent = score;
+  $("streak").textContent = streak;
+  $("statement").textContent = statements[index].text;
+  $("statement-card").dataset.state = "idle";
+  $("reveal").hidden = true;
+  $("btn-next").hidden = true;
+}
+
+function answer(choice){
+  if (locked) return;
+  locked = true;
+  const s = statements[index];
+  const correct = choice === s.answer;
+  if (correct){ score++; streak++; best = Math.max(best, streak); } else { streak = 0; }
+  $("score").textContent = score;
+  $("streak").textContent = streak;
+  $("statement-card").dataset.state = correct ? "correct" : "wrong";  // animate this with GSAP later
+  $("reveal").textContent = (correct ? "Correct! " : "Not quite. ") + "It's " + s.answer.toUpperCase() + ". " + s.why;
+  $("reveal").hidden = false;
+  $("btn-next").hidden = false;
+  $("btn-next").textContent = (index === statements.length - 1) ? "See results" : "Next";
+}
+
+function next(){
+  index++;
+  if (index >= statements.length){
+    $("final-score").textContent = "You got " + score + " out of " + statements.length + ".";
+    $("best-streak").textContent = "Best streak: " + best;
+    show("screen-end");
+  } else loadStatement();
+}
+
+function restart(){ index = 0; score = 0; streak = 0; best = 0; loadStatement(); show("screen-game"); }
+
+$("btn-start").addEventListener("click", restart);
+$("btn-restart").addEventListener("click", restart);
+$("btn-next").addEventListener("click", next);
+$("btn-real").addEventListener("click", () => answer("real"));
+$("btn-fake").addEventListener("click", () => answer("fake"));
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* Shared effects. Reads the games' existing ids/classes/data-state, so game logic is untouched.
+   Plain JS recreations of: LetterGlitch, ClickSpark, SpotlightCard, TiltedCard, DecryptedText, CountUp. */
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap = () => !!window.gsap && !reduce;
+
+  const acc = '#ff2bd6';
+
+  /* ---- Twinkling starfield ---- */
+  const bg = document.createElement('canvas');
+  bg.id = 'fx-bg';
+  document.body.prepend(bg);
+  const g = bg.getContext('2d');
+  let stars = [];
+  function initBg() {
+    bg.width = innerWidth; bg.height = innerHeight;
+    stars = Array.from({ length: Math.round(innerWidth * innerHeight / 7000) }, (_, i) => ({
+      x: Math.random() * bg.width, y: Math.random() * bg.height * .66, r: Math.random() * 1.4 + .3,
+      a: Math.random(), d: (Math.random() < .5 ? -1 : 1) * (.006 + Math.random() * .02), c: i % 9 === 0 ? '#ff2bd6' : i % 11 === 0 ? '#00f0ff' : '#ffffff'
+    }));
+    draw();
+  }
+  function draw() {
+    g.clearRect(0, 0, bg.width, bg.height);
+    stars.forEach(s => {
+      if (!reduce) { s.a += s.d; if (s.a > 1 || s.a < .1) s.d = -s.d; }
+      g.globalAlpha = Math.max(.1, Math.min(1, s.a)); g.fillStyle = s.c;
+      g.beginPath(); g.arc(s.x, s.y, s.r, 0, 6.2832); g.fill();
+    });
+  }
+  initBg(); addEventListener('resize', initBg);
+  if (!reduce) setInterval(draw, 60);
+
+  /* ---- ClickSpark ---- */
+  const sp = document.createElement('canvas');
+  sp.id = 'fx-spark'; document.body.append(sp);
+  const sc = sp.getContext('2d'); let sparks = [];
+  const SC = ['#ff2bd6','#00f0ff','#ffe66d'], SN = 12;
+  const sizeSp = () => { sp.width = innerWidth; sp.height = innerHeight; };
+  sizeSp(); addEventListener('resize', sizeSp);
+  addEventListener('pointerdown', e => {
+    const t = performance.now();
+    for (let i = 0; i < SN; i++) sparks.push({ x: e.clientX, y: e.clientY, a: Math.PI * 2 * i / SN, t, c: SC[i % SC.length] });
+  });
+  (function loop(t) {
+    sc.clearRect(0, 0, sp.width, sp.height);
+    sparks = sparks.filter(s => t - s.t < 450);
+    sc.lineWidth = 2.5; sc.lineCap = 'round';
+    sparks.forEach(s => {
+      const p = (t - s.t) / 450, d = 18 * (1 - (1 - p) * (1 - p)), l = 14 * (1 - p);
+      sc.strokeStyle = s.c;
+      sc.beginPath();
+      sc.moveTo(s.x + Math.cos(s.a) * d, s.y + Math.sin(s.a) * d);
+      sc.lineTo(s.x + Math.cos(s.a) * (d + l), s.y + Math.sin(s.a) * (d + l));
+      sc.stroke();
+    });
+    requestAnimationFrame(loop);
+  })(performance.now());
+
+  /* ---- Spotlight + Tilt on cards (delegated, so generated options work too) ---- */
+  const CARD = '.card,.option,#statement-card,#tester';
+  document.addEventListener('pointermove', e => {
+    const c = e.target.closest && e.target.closest(CARD);
+    if (!c) return;
+    const r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px');
+    if (!reduce && 7 && c.id !== 'tester')
+      c.style.transform = `perspective(700px) rotateX(${-(y / r.height - .5) * 7}deg) rotateY(${(x / r.width - .5) * 7}deg) scale(1.04)`;
+  });
+  document.addEventListener('pointerout', e => {
+    const c = e.target.closest && e.target.closest(CARD);
+    if (c && !c.contains(e.relatedTarget)) c.style.transform = '';
+  });
+
+  /* ---- DecryptedText ---- */
+  const pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@%';
+  function decrypt(el, ms = 650) {
+    const text = el.textContent, n = text.length;
+    el._last = text;
+    if (reduce || !n) return;
+    el._busy = true;
+    const t0 = performance.now();
+    (function f(t) {
+      const p = Math.min(1, (t - t0) / ms), k = Math.floor(p * n);
+      el.textContent = text.slice(0, k) + [...text.slice(k)].map(c => c === ' ' ? c : pool[Math.random() * pool.length | 0]).join('');
+      if (p < 1) requestAnimationFrame(f); else { el.textContent = text; el._busy = false; }
+    })(t0);
+  }
+  /* Decrypt whenever the game writes new text into these elements */
+  const watch = el => new MutationObserver(() => {
+    if (el._busy || el.textContent === el._last) return;
+    decrypt(el);
+  }).observe(el, { childList: true, characterData: true });
+  ['.password', '#statement', '#feedback', '#reveal', '#fact', '#final-score', '#best-streak'].forEach(s => $$(s).forEach(watch));
+
+  /* ---- CountUp on the score ---- */
+  const score = $('#score');
+  if (score) {
+    score._v = 0;
+    new MutationObserver(() => {
+      const to = +score.textContent;
+      if (score._busy || to === score._v) return;
+      const from = score._v, t0 = performance.now();
+      score._busy = true;
+      (function f(t) {
+        const p = Math.min(1, (t - t0) / 400);
+        score.textContent = Math.round(from + (to - from) * p);
+        if (p < 1) requestAnimationFrame(f); else { score._v = to; score._busy = false; }
+      })(t0);
+    }).observe(score, { childList: true, characterData: true });
+  }
+
+  /* ---- GSAP: screen transitions + answer feedback ---- */
+  $$('section').forEach(s => new MutationObserver(() => {
+    if (s.hidden) return;
+    $$('h1,h2', s).forEach(h => decrypt(h));
+    if (hasGsap()) gsap.from(s, { opacity: 0, scale: .9, skewX: -6, duration: .5, ease: 'power4.out', clearProps: 'all' });
+  }).observe(s, { attributes: true, attributeFilter: ['hidden'] }));
+  $$('#screen-start h1').forEach(h => decrypt(h));
+
+  new MutationObserver(list => list.forEach(m => {
+    if (!hasGsap()) return;
+    const el = m.target, s = el.dataset.state;
+    if (s === 'wrong' || s === 'loser') gsap.fromTo(el, { x: -10 }, { x: 0, duration: .5, ease: 'elastic.out(1,.3)', clearProps: 'x' });
+    if (s === 'correct' || s === 'winner') gsap.fromTo(el, { scale: .94 }, { scale: 1, duration: .6, ease: 'back.out(2)', clearProps: 'scale' });
+  })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['data-state'] });
+})();
+
+</script>
+</body>
+</html>
